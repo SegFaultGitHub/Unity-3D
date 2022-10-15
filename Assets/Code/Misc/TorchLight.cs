@@ -14,7 +14,7 @@ public class TorchLight : MonoBehaviour {
     [SerializeField] private float MaxRangeDiff;
     [SerializeField] private Vector3 MaxPositionDiff;
 
-    private void Awake() {
+    private void Start() {
         this.Light = this.GetComponentInChildren<Light>();
         this.InitialIntensity = this.Light.intensity;
         this.InitialRange = this.Light.range;

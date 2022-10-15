@@ -32,6 +32,12 @@ public partial class PlayerController : MonoBehaviour {
         this.HandleInput();
     }
 
+    public void SetPosition(Vector3 position) {
+        this.Controller.enabled = false;
+        this.transform.position = position;
+        this.Controller.enabled = true;
+    }
+
     #region Input
     private PlayerInputs PlayerInputs;
     private class _Input {
@@ -98,7 +104,7 @@ public partial class PlayerController : MonoBehaviour {
                 this.transform.rotation = Quaternion.Euler(0, angle, 0);
 
                 Vector3 movementDirection = Quaternion.Euler(0, targetAngle, 0) * Vector3.forward;
-                this.Controller.Move(movementDirection.normalized / 10);
+                this.Controller.Move(movementDirection.normalized / 5);
             }
 
             CollisionFlags flags = this.Controller.Move(this.FallingSpeed);
@@ -112,12 +118,12 @@ public partial class PlayerController : MonoBehaviour {
     }
 
     private void OnTriggerEnter(Collider collider) {
-        if (collider.CompareTag("DoorSide1")) {
+        if (collider.CompareTag("Door/Side1")) {
             Door door = collider.GetComponentInParent<Door>();
             this.Interactions.Add(door.OpenSide1);
             if (!door.Opened)
                 door.Enable();
-        } else if (collider.CompareTag("DoorSide2")) {
+        } else if (collider.CompareTag("Door/Side2")) {
             Door door = collider.GetComponentInParent<Door>();
             this.Interactions.Add(door.OpenSide2);
             if (!door.Opened)
@@ -126,16 +132,34 @@ public partial class PlayerController : MonoBehaviour {
             Chest chest = collider.GetComponentInParent<Chest>();
             this.Interactions.Add(chest.Open);
             if (!chest.Opened)
-                chest.Enable();
+                chest.Enable(); 
+        }
+
+        if (collider.CompareTag("Door/Left")) {
+            Map map = GameObject.FindGameObjectWithTag("Map").GetComponent<Map>();
+            map.ChangeRoom(Direction.Left);
+            return;
+        } else if (collider.CompareTag("Door/Right")) {
+            Map map = GameObject.FindGameObjectWithTag("Map").GetComponent<Map>();
+            map.ChangeRoom(Direction.Right);
+            return;
+        } else if (collider.CompareTag("Door/Up")) {
+            Map map = GameObject.FindGameObjectWithTag("Map").GetComponent<Map>();
+            map.ChangeRoom(Direction.Up);
+            return;
+        } else if (collider.CompareTag("Door/Down")) {
+            Map map = GameObject.FindGameObjectWithTag("Map").GetComponent<Map>();
+            map.ChangeRoom(Direction.Down);
+            return;
         }
     }
 
     private void OnTriggerExit(Collider collider) {
-        if (collider.CompareTag("DoorSide1")) {
+        if (collider.CompareTag("Door/Side1")) {
             Door door = collider.GetComponentInParent<Door>();
             this.Interactions.Remove(door.OpenSide1);
             door.Disable();
-        } else if (collider.CompareTag("DoorSide2")) {
+        } else if (collider.CompareTag("Door/Side2")) {
             Door door = collider.GetComponentInParent<Door>();
             this.Interactions.Remove(door.OpenSide2);
             door.Disable();

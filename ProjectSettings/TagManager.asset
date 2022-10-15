@@ -4,11 +4,15 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - DoorSide1
-  - DoorSide2
   - Chest
   - CinemachineCamera
   - PauseManager
+  - Door/Side1
+  - Door/Side2
+  - Door/Up
+  - Door/Down
+  - Door/Left
+  - Door/Right
   layers:
   - Default
   - TransparentFX
