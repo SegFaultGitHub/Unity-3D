@@ -78,7 +78,7 @@ GameObject:
   - component: {fileID: 2158742347374855354}
   m_Layer: 0
   m_Name: openSide1
-  m_TagString: DoorSide1
+  m_TagString: Door/Side1
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -123,7 +123,7 @@ GameObject:
   - component: {fileID: 4134083273942342658}
   m_Layer: 0
   m_Name: openSide2
-  m_TagString: DoorSide2
+  m_TagString: Door/Side2
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
