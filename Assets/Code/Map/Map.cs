@@ -192,10 +192,10 @@ public class Map : MonoBehaviour {
                     room = Utils.Sample(hubs);
                 }
             } else {
-                room = Utils.Sample(rooms.Where(room => !room.Hub).ToList());
+                room = this.SelectRoom(rooms, roomEntry);
             }
             if (room == null) {
-                room = Utils.Sample(rooms.Where(room => !room.Hub).ToList());
+                room = this.SelectRoom(rooms, roomEntry);
             }
             roomEntry.Room = this.SetRoom(room, roomEntry.Doors.Keys.ToList(), roomEntry.Position);
             roomEntry.Room.Hub = roomEntry.Hub;
@@ -205,6 +205,15 @@ public class Map : MonoBehaviour {
             if (this.MapLayoutData.MinJ > roomEntry.Room.Position.y) { this.MapLayoutData.MinJ = roomEntry.Room.Position.y; }
             if (this.MapLayoutData.MaxJ < roomEntry.Room.Position.y) { this.MapLayoutData.MaxJ = roomEntry.Room.Position.y; }
         });
+    }
+
+    private Room SelectRoom(List<Room> rooms, RoomEntry roomEntry) {
+        List<string> adjacentRoomNames = roomEntry.Doors.Values.Select(roomEntry => roomEntry.Room == null ? "" : roomEntry.Room.PrefabName).ToList();
+        List<Room> possibleRooms = rooms.Where(room => !room.Hub && !adjacentRoomNames.Contains(room.name)).ToList();
+        if (possibleRooms.Count == 0)
+            return Utils.Sample(rooms.Where(room => !room.Hub).ToList());
+        else
+            return Utils.Sample(possibleRooms);
     }
 
     private bool DirectionGroupsMatch(Room room, RoomEntry roomEntry) {
@@ -342,6 +351,7 @@ public class Map : MonoBehaviour {
         room.Position = position;
         room.gameObject.SetActive(false);
         room.name = "Room: " + position.x + "/" + position.y + " [" + roomPrefab.name + "]";
+        room.PrefabName = roomPrefab.name;
 
         return room;
     }

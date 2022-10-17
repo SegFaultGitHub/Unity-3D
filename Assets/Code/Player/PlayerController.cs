@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -26,10 +27,35 @@ public partial class PlayerController : MonoBehaviour {
     }
 
     private void Update() {
-        this.Animator.speed = PauseManager.Paused ? 0 : this.AnimatorSpeed;
+        if (PauseManager.Paused)
+            this.Animator.speed = 0;
+        else 
+            this.Animator.speed = PauseManager.GlobalSpeed * this.AnimatorSpeed;
 
         this.GatherInput();
         this.HandleInput();
+    }
+
+    private void FixedUpdate() {
+        #region Movement
+        if (!PauseManager.Paused) {
+            if (this.MovementDirection.sqrMagnitude != 0) {
+                float targetAngle = Mathf.Atan2(this.MovementDirection.x, this.MovementDirection.z) * Mathf.Rad2Deg + this.Camera.eulerAngles.y;
+                float angle = Mathf.SmoothDampAngle(this.transform.eulerAngles.y, targetAngle, ref this.TurnSmoothVelocity, this.TurnSmoothTime / PauseManager.GlobalSpeed);
+                this.transform.rotation = Quaternion.Euler(0, angle, 0);
+
+                Vector3 movementDirection = Quaternion.Euler(0, targetAngle, 0) * Vector3.forward;
+                this.Controller.Move((PauseManager.GlobalSpeed / 5f) * movementDirection.normalized);
+            }
+
+            CollisionFlags flags = this.Controller.Move(PauseManager.GlobalSpeed * this.FallingSpeed);
+            if (flags == CollisionFlags.Below) {
+                this.FallingSpeed = this.Gravity;
+            } else {
+                this.FallingSpeed += this.Gravity;
+            }
+        }
+        #endregion
     }
 
     public void SetPosition(Vector3 position) {
@@ -44,10 +70,12 @@ public partial class PlayerController : MonoBehaviour {
         public bool MoveStarted;
         public bool MoveInProgress;
         public bool MoveEnded;
-
+        // --
         public bool AttackPressed;
-
+        // --
         public bool InteractPressed;
+        //Debug
+        public bool HitPressed;
     }
     private _Input Input;
 
@@ -65,10 +93,12 @@ public partial class PlayerController : MonoBehaviour {
             MoveStarted = this.PlayerInputs.Controls.Move.WasPressedThisFrame(),
             MoveInProgress = this.PlayerInputs.Controls.Move.IsPressed(),
             MoveEnded = this.PlayerInputs.Controls.Move.WasReleasedThisFrame(),
-
+            // --
             AttackPressed = false,
-
+            // --
             InteractPressed = this.PlayerInputs.Controls.Interact.WasPressedThisFrame(),
+            //Debug
+            HitPressed = this.PlayerInputs.Controls.Hit.WasPressedThisFrame(),
         };
     }
 
@@ -80,6 +110,10 @@ public partial class PlayerController : MonoBehaviour {
         if (this.Input.MoveStarted || this.Input.MoveInProgress || this.Input.MoveEnded) {
             this.Move(this.PlayerInputs.Controls.Move.ReadValue<Vector2>());
         }
+
+        if (this.Input.HitPressed) {
+            this.Hit();
+        }
     }
     #endregion
 
@@ -90,31 +124,22 @@ public partial class PlayerController : MonoBehaviour {
     }
 
     private void Interact() {
+        if (this.Interactions.Count == 0)
+            return;
+
         foreach (Action action in this.Interactions) {
             action.Invoke();
         }
     }
 
-    private void FixedUpdate() {
-        #region Movement
-        if (!PauseManager.Paused) {
-            if (this.MovementDirection.sqrMagnitude != 0) {
-                float targetAngle = Mathf.Atan2(this.MovementDirection.x, this.MovementDirection.z) * Mathf.Rad2Deg + this.Camera.eulerAngles.y;
-                float angle = Mathf.SmoothDampAngle(this.transform.eulerAngles.y, targetAngle, ref this.TurnSmoothVelocity, this.TurnSmoothTime);
-                this.transform.rotation = Quaternion.Euler(0, angle, 0);
+    private void Hit() {
+        PauseManager.SetGlobalSpeed(0.1f, 0f)
+            .setOnComplete(() => this.StartCoroutine(this.ResetTimeScale()));
+    }
 
-                Vector3 movementDirection = Quaternion.Euler(0, targetAngle, 0) * Vector3.forward;
-                this.Controller.Move(movementDirection.normalized / 5);
-            }
-
-            CollisionFlags flags = this.Controller.Move(this.FallingSpeed);
-            if (flags == CollisionFlags.Below) {
-                this.FallingSpeed = this.Gravity;
-            } else {
-                this.FallingSpeed += this.Gravity;
-            }
-        }
-        #endregion
+    private IEnumerator ResetTimeScale() {
+        yield return new WaitForSeconds(2f);
+        PauseManager.SetGlobalSpeed(1, 0f);
     }
 
     private void OnTriggerEnter(Collider collider) {

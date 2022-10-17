@@ -3,6 +3,22 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 
 public static class Utils {
+    public static GameObject RandomRange(List<RandomGameObjectWeight> o) {
+        float total = 0;
+        foreach (RandomGameObjectWeight randomGameObject in o) {
+            total += randomGameObject.Weight;
+        }
+        float choice = Random.Range(0, total);
+        float index = 0;
+        foreach (RandomGameObjectWeight randomGameObject in o) {
+            index += randomGameObject.Weight;
+            if (choice <= index)
+                return randomGameObject.GameObject;
+        }
+
+        return o[^1].GameObject;
+    }
+
     public static T RandomRange<T>(List<(float, T)> o) {
         float total = 0;
         foreach ((float value, T _) in o) {

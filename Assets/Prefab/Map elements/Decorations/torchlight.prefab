@@ -45,8 +45,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1fe3b92ba1a9b2546a96e3cfe28d7177, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MaxIntensityDiff: 10
-  MaxRangeDiff: 0.3
+  MaxIntensityDiff: 0.15
+  MaxRangeDiff: 0.15
   MaxPositionDiff: {x: 0.02, y: 0.02, z: 0.02}
 --- !u!1 &1905959393097454876
 GameObject:

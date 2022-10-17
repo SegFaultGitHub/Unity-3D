@@ -10,8 +10,10 @@ public class TorchLight : MonoBehaviour {
     private float XOffsetRange, YOffsetRange;
     private Vector3 XOffsetsPosition, YOffsetsPosition;
 
-    [SerializeField] private float MaxIntensityDiff;
-    [SerializeField] private float MaxRangeDiff;
+    // percentage
+    [SerializeField] private float MaxIntensityDiff = 0.15f;
+    // percentage
+    [SerializeField] private float MaxRangeDiff = 0.15f;
     [SerializeField] private Vector3 MaxPositionDiff;
 
     private void Start() {
@@ -41,8 +43,8 @@ public class TorchLight : MonoBehaviour {
             2 * Mathf.PerlinNoise(this.XOffsetsPosition[2], this.YOffsetsPosition[2]) - 1
         );
 
-        this.Light.intensity = this.InitialIntensity + intensityDiff * this.MaxIntensityDiff;
-        this.Light.range = this.InitialRange + rangeDiff * this.MaxRangeDiff;
+        this.Light.intensity = this.InitialIntensity + intensityDiff * (this.InitialIntensity * this.MaxIntensityDiff);
+        this.Light.range = this.InitialRange + rangeDiff * (this.InitialRange * this.MaxRangeDiff);
         this.Light.transform.localPosition = this.InitialPosition + Vector3.Scale(positionDiff, this.MaxPositionDiff);
 
         this.YOffsetIntensity += 0.01f;

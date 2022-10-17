@@ -62,20 +62,18 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Hit"",
+                    ""type"": ""Button"",
+                    ""id"": ""11e9bedb-fa49-4bfc-a0b5-946764724966"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
-                {
-                    ""name"": """",
-                    ""id"": ""05890b25-1dbd-48fe-b15e-a8ee79e9a2e6"",
-                    ""path"": """",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Controls"",
-                    ""action"": ""Move"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
                 {
                     ""name"": ""2D Vector"",
                     ""id"": ""4b4ed6f9-b05f-4973-94dc-7584a467f670"",
@@ -132,6 +130,61 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": true
                 },
                 {
+                    ""name"": ""2D Vector"",
+                    ""id"": ""1d959504-4465-4725-942f-ba1eee6c1deb"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""8cdabd6b-3f61-424b-83dd-291646cb456d"",
+                    ""path"": ""<Keyboard>/z"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""ab2fa7a0-3958-4a22-847b-a92455d03f5e"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""01f8cd9e-b241-43f8-9ae7-33c277df2e4a"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""5a7278dd-c76a-4e2d-aed0-694dfb5e0f9f"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
                     ""name"": """",
                     ""id"": ""1cf17106-d2aa-4efa-ba2e-f11fd941d41c"",
                     ""path"": ""<Mouse>/delta"",
@@ -181,6 +234,7 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
         m_Controls_Look = m_Controls.FindAction("Look", throwIfNotFound: true);
         m_Controls_Jump = m_Controls.FindAction("Jump", throwIfNotFound: true);
         m_Controls_Interact = m_Controls.FindAction("Interact", throwIfNotFound: true);
+        m_Controls_Hit = m_Controls.FindAction("Hit", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -244,6 +298,7 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
     private readonly InputAction m_Controls_Look;
     private readonly InputAction m_Controls_Jump;
     private readonly InputAction m_Controls_Interact;
+    private readonly InputAction m_Controls_Hit;
     public struct ControlsActions
     {
         private @PlayerInputs m_Wrapper;
@@ -252,6 +307,7 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
         public InputAction @Look => m_Wrapper.m_Controls_Look;
         public InputAction @Jump => m_Wrapper.m_Controls_Jump;
         public InputAction @Interact => m_Wrapper.m_Controls_Interact;
+        public InputAction @Hit => m_Wrapper.m_Controls_Hit;
         public InputActionMap Get() { return m_Wrapper.m_Controls; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -273,6 +329,9 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
                 @Interact.started -= m_Wrapper.m_ControlsActionsCallbackInterface.OnInteract;
                 @Interact.performed -= m_Wrapper.m_ControlsActionsCallbackInterface.OnInteract;
                 @Interact.canceled -= m_Wrapper.m_ControlsActionsCallbackInterface.OnInteract;
+                @Hit.started -= m_Wrapper.m_ControlsActionsCallbackInterface.OnHit;
+                @Hit.performed -= m_Wrapper.m_ControlsActionsCallbackInterface.OnHit;
+                @Hit.canceled -= m_Wrapper.m_ControlsActionsCallbackInterface.OnHit;
             }
             m_Wrapper.m_ControlsActionsCallbackInterface = instance;
             if (instance != null)
@@ -289,6 +348,9 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
                 @Interact.started += instance.OnInteract;
                 @Interact.performed += instance.OnInteract;
                 @Interact.canceled += instance.OnInteract;
+                @Hit.started += instance.OnHit;
+                @Hit.performed += instance.OnHit;
+                @Hit.canceled += instance.OnHit;
             }
         }
     }
@@ -308,5 +370,6 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
         void OnLook(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
         void OnInteract(InputAction.CallbackContext context);
+        void OnHit(InputAction.CallbackContext context);
     }
 }
