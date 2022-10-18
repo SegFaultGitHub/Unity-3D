@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,9 +7,9 @@ public class Room : MonoBehaviour {
         public Vector3 Position;
     }
 
-    public Transform StartingPosition;
     public bool Enabled;
 
+    [HideInInspector] public Transform StartingPosition;
     [HideInInspector] public Vector2Int Position;
     [HideInInspector] public Dictionary<Direction, Transition> Transitions { get; private set; }
 
@@ -19,6 +18,12 @@ public class Room : MonoBehaviour {
     public bool RightDoorAllowed = true;
     public bool UpDoorAllowed = true;
     public bool DownDoorAllowed = true;
+
+    [Header("Out Of Bounds Doors")]
+    public bool LeftDoorOOB = false;
+    public bool RightDoorOOB = false;
+    public bool UpDoorOOB = false;
+    public bool DownDoorOOB = false;
 
     [Header("Doorways")]
     [SerializeField] public List<Map.DirectionGroup> DirectionGroups;
@@ -30,6 +35,8 @@ public class Room : MonoBehaviour {
     [Header("Debug data")]
     public bool Hub;
     public Direction OriginalDirection;
+
+    [HideInInspector] public string PrefabName;
 
     private void Awake() {
         this.Transitions = new Dictionary<Direction, Transition> {
@@ -55,6 +62,32 @@ public class Room : MonoBehaviour {
     }
 
     public void SetDirectionActive(Direction direction, bool active) {
+        switch (direction) {
+            case Direction.Up:
+                if (this.UpDoorOOB) {
+                    this.Transitions[direction].Transform.gameObject.SetActive(false);
+                    return;
+                }
+                break;
+            case Direction.Down:
+                if (this.DownDoorOOB) {
+                    this.Transitions[direction].Transform.gameObject.SetActive(false);
+                    return;
+                }
+                break;
+            case Direction.Left:
+                if (this.LeftDoorOOB) {
+                    this.Transitions[direction].Transform.gameObject.SetActive(false);
+                    return;
+                }
+                break;
+            case Direction.Right:
+                if (this.RightDoorOOB) {
+                    this.Transitions[direction].Transform.gameObject.SetActive(false);
+                    return;
+                }
+                break;
+        }
         this.Transitions[direction].Transform.Find("active").gameObject.SetActive(active);
         this.Transitions[direction].Transform.Find("inactive").gameObject.SetActive(!active);
     }
