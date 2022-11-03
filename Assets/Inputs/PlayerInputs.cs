@@ -71,6 +71,33 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Target"",
+                    ""type"": ""Button"",
+                    ""id"": ""bca3cfe3-ede9-485b-bf18-3ea67d801aba"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SwitchTargetLeft"",
+                    ""type"": ""Button"",
+                    ""id"": ""a155f691-369b-475c-b046-f3b38d2c605d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SwitchTargetRight"",
+                    ""type"": ""Button"",
+                    ""id"": ""ac4fc3fe-6148-40da-af68-979cc5d96dc5"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -216,6 +243,39 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
                     ""action"": ""Interact"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e570e0a8-405d-4acd-bec4-86eefac7c4ff"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Target"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""87424640-0d26-403a-a849-6f6c20462cdf"",
+                    ""path"": ""<Keyboard>/1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SwitchTargetLeft"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""35be6e8e-7cdb-4ac6-bcf6-ce028e1cd558"",
+                    ""path"": ""<Keyboard>/3"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SwitchTargetRight"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -235,6 +295,9 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
         m_Controls_Jump = m_Controls.FindAction("Jump", throwIfNotFound: true);
         m_Controls_Interact = m_Controls.FindAction("Interact", throwIfNotFound: true);
         m_Controls_Hit = m_Controls.FindAction("Hit", throwIfNotFound: true);
+        m_Controls_Target = m_Controls.FindAction("Target", throwIfNotFound: true);
+        m_Controls_SwitchTargetLeft = m_Controls.FindAction("SwitchTargetLeft", throwIfNotFound: true);
+        m_Controls_SwitchTargetRight = m_Controls.FindAction("SwitchTargetRight", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -299,6 +362,9 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
     private readonly InputAction m_Controls_Jump;
     private readonly InputAction m_Controls_Interact;
     private readonly InputAction m_Controls_Hit;
+    private readonly InputAction m_Controls_Target;
+    private readonly InputAction m_Controls_SwitchTargetLeft;
+    private readonly InputAction m_Controls_SwitchTargetRight;
     public struct ControlsActions
     {
         private @PlayerInputs m_Wrapper;
@@ -308,6 +374,9 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
         public InputAction @Jump => m_Wrapper.m_Controls_Jump;
         public InputAction @Interact => m_Wrapper.m_Controls_Interact;
         public InputAction @Hit => m_Wrapper.m_Controls_Hit;
+        public InputAction @Target => m_Wrapper.m_Controls_Target;
+        public InputAction @SwitchTargetLeft => m_Wrapper.m_Controls_SwitchTargetLeft;
+        public InputAction @SwitchTargetRight => m_Wrapper.m_Controls_SwitchTargetRight;
         public InputActionMap Get() { return m_Wrapper.m_Controls; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -332,6 +401,15 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
                 @Hit.started -= m_Wrapper.m_ControlsActionsCallbackInterface.OnHit;
                 @Hit.performed -= m_Wrapper.m_ControlsActionsCallbackInterface.OnHit;
                 @Hit.canceled -= m_Wrapper.m_ControlsActionsCallbackInterface.OnHit;
+                @Target.started -= m_Wrapper.m_ControlsActionsCallbackInterface.OnTarget;
+                @Target.performed -= m_Wrapper.m_ControlsActionsCallbackInterface.OnTarget;
+                @Target.canceled -= m_Wrapper.m_ControlsActionsCallbackInterface.OnTarget;
+                @SwitchTargetLeft.started -= m_Wrapper.m_ControlsActionsCallbackInterface.OnSwitchTargetLeft;
+                @SwitchTargetLeft.performed -= m_Wrapper.m_ControlsActionsCallbackInterface.OnSwitchTargetLeft;
+                @SwitchTargetLeft.canceled -= m_Wrapper.m_ControlsActionsCallbackInterface.OnSwitchTargetLeft;
+                @SwitchTargetRight.started -= m_Wrapper.m_ControlsActionsCallbackInterface.OnSwitchTargetRight;
+                @SwitchTargetRight.performed -= m_Wrapper.m_ControlsActionsCallbackInterface.OnSwitchTargetRight;
+                @SwitchTargetRight.canceled -= m_Wrapper.m_ControlsActionsCallbackInterface.OnSwitchTargetRight;
             }
             m_Wrapper.m_ControlsActionsCallbackInterface = instance;
             if (instance != null)
@@ -351,6 +429,15 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
                 @Hit.started += instance.OnHit;
                 @Hit.performed += instance.OnHit;
                 @Hit.canceled += instance.OnHit;
+                @Target.started += instance.OnTarget;
+                @Target.performed += instance.OnTarget;
+                @Target.canceled += instance.OnTarget;
+                @SwitchTargetLeft.started += instance.OnSwitchTargetLeft;
+                @SwitchTargetLeft.performed += instance.OnSwitchTargetLeft;
+                @SwitchTargetLeft.canceled += instance.OnSwitchTargetLeft;
+                @SwitchTargetRight.started += instance.OnSwitchTargetRight;
+                @SwitchTargetRight.performed += instance.OnSwitchTargetRight;
+                @SwitchTargetRight.canceled += instance.OnSwitchTargetRight;
             }
         }
     }
@@ -371,5 +458,8 @@ public partial class @PlayerInputs : IInputActionCollection2, IDisposable
         void OnJump(InputAction.CallbackContext context);
         void OnInteract(InputAction.CallbackContext context);
         void OnHit(InputAction.CallbackContext context);
+        void OnTarget(InputAction.CallbackContext context);
+        void OnSwitchTargetLeft(InputAction.CallbackContext context);
+        void OnSwitchTargetRight(InputAction.CallbackContext context);
     }
 }

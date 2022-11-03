@@ -1,3 +1,4 @@
+using Cinemachine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,17 +9,27 @@ public partial class PlayerController : MonoBehaviour {
     private Animator Animator;
     private float AnimatorSpeed;
     private Transform Camera;
+    CinemachineFreeLook Cinemachine;
 
     private Vector3 MovementDirection;
-    [SerializeField] private Vector3 FallingSpeed;
+    private Vector3 FallingSpeed;
     private float TurnSmoothVelocity;
     private readonly float TurnSmoothTime = 0.1f;
     private readonly Vector3 Gravity = new(0, -0.02f, 0);
+
+    [SerializeField] private float MaxTargetDistance = 10;
+    private float XMaxSpeed;
+    [SerializeField] private GameObject CurrentTarget;
+    [SerializeField] private GameObject LeftTarget;
+    [SerializeField] private GameObject RightTarget;
+    private bool Targetting;
 
     private List<Action> Interactions;
 
     private void Awake() {
         this.Camera = GameObject.FindGameObjectWithTag("MainCamera").transform;
+        this.Cinemachine = GameObject.FindGameObjectWithTag("CinemachineCamera").GetComponent<CinemachineFreeLook>();
+        this.XMaxSpeed = this.Cinemachine.m_XAxis.m_MaxSpeed;
         this.Controller = this.GetComponent<CharacterController>();
         this.Animator = this.GetComponentInChildren<Animator>();
         this.AnimatorSpeed = this.Animator.speed;
@@ -34,6 +45,90 @@ public partial class PlayerController : MonoBehaviour {
 
         this.GatherInput();
         this.HandleInput();
+
+        if (!this.Targetting) {
+            Vector3 direction = Quaternion.AngleAxis(this.Camera.transform.eulerAngles.y, Vector3.up) * Vector3.forward;
+            Vector3 from = this.transform.position + new Vector3(0, 1, 0);
+            RaycastHit[] hits = Physics.RaycastAll(from, direction, this.MaxTargetDistance, LayerMask.GetMask("Enemy"));
+            if (hits.Length != 0) {
+                if (this.CurrentTarget == null) {
+                    this.CurrentTarget = hits[0].collider.gameObject;
+                    this.CurrentTarget.GetComponent<Outlineable>().Enable();
+                } else if (hits[0].collider.gameObject != this.CurrentTarget) {
+                    this.CurrentTarget.GetComponent<Outlineable>().Disable();
+                    this.CurrentTarget = hits[0].collider.gameObject;
+                    this.CurrentTarget.GetComponent<Outlineable>().Enable();
+                }
+            } else {
+                if (this.CurrentTarget != null)
+                    this.CurrentTarget.GetComponent<Outlineable>().Disable();
+                this.CurrentTarget = null;
+            }
+            Debug.DrawLine(from, from + direction * this.MaxTargetDistance);
+        } else {
+            Vector3 diff = this.CurrentTarget.transform.position - this.transform.position;
+            if (diff.magnitude > this.MaxTargetDistance) {
+                this.ToggleTarget();
+            } else {
+                float targetAngle = Quaternion.FromToRotation(Vector3.forward, diff).eulerAngles.y;
+                float angle = Mathf.SmoothDampAngle(
+                        this.Cinemachine.m_XAxis.Value,
+                        targetAngle,
+                        ref this.TurnSmoothVelocity, this.TurnSmoothTime / PauseManager.GlobalSpeed
+                    );
+                this.Cinemachine.m_XAxis.Value = angle;
+            }
+
+            bool targetFound;
+
+            targetFound = false;
+            for (int i = 0; i <= 60; i += 5) {
+                Vector3 direction = Quaternion.AngleAxis(this.Camera.transform.eulerAngles.y + i, Vector3.up) * Vector3.forward;
+                Vector3 from = this.transform.position + new Vector3(0, 1, 0);
+                RaycastHit[] hits = Physics.RaycastAll(from, direction, this.MaxTargetDistance, LayerMask.GetMask("Enemy"));
+                if (hits.Length == 0)
+                    continue;
+
+                Collider collider = hits[0].collider;
+                if (collider.gameObject == this.CurrentTarget) {
+                    if (hits.Length == 1)
+                        continue;
+                    collider = hits[1].collider;
+                }
+                if (collider.gameObject == this.CurrentTarget)
+                    continue;
+
+                this.RightTarget = collider.gameObject;
+                targetFound = true;
+                break;
+            }
+            if (!targetFound)
+                this.RightTarget = null;
+
+            targetFound = false;
+            for (int i = 0; i >= -60; i -= 5) {
+                Vector3 direction = Quaternion.AngleAxis(this.Camera.transform.eulerAngles.y + i, Vector3.up) * Vector3.forward;
+                Vector3 from = this.transform.position + new Vector3(0, 1, 0);
+                RaycastHit[] hits = Physics.RaycastAll(from, direction, this.MaxTargetDistance, LayerMask.GetMask("Enemy"));
+                if (hits.Length == 0)
+                    continue;
+
+                Collider collider = hits[0].collider;
+                if (collider.gameObject == this.CurrentTarget) {
+                    if (hits.Length == 1)
+                        continue;
+                    collider = hits[1].collider;
+                }
+                if (collider.gameObject == this.CurrentTarget)
+                    continue;
+
+                this.LeftTarget = collider.gameObject;
+                targetFound = true;
+                break;
+            }
+            if (!targetFound)
+                this.LeftTarget = null;
+        }
     }
 
     private void FixedUpdate() {
@@ -41,8 +136,17 @@ public partial class PlayerController : MonoBehaviour {
         if (!PauseManager.Paused) {
             if (this.MovementDirection.sqrMagnitude != 0) {
                 float targetAngle = Mathf.Atan2(this.MovementDirection.x, this.MovementDirection.z) * Mathf.Rad2Deg + this.Camera.eulerAngles.y;
-                float angle = Mathf.SmoothDampAngle(this.transform.eulerAngles.y, targetAngle, ref this.TurnSmoothVelocity, this.TurnSmoothTime / PauseManager.GlobalSpeed);
-                this.transform.rotation = Quaternion.Euler(0, angle, 0);
+                if (this.Targetting) {
+                    float angle = Mathf.SmoothDampAngle(
+                        this.transform.eulerAngles.y,
+                        Quaternion.FromToRotation(Vector3.forward, this.CurrentTarget.transform.position - this.transform.position).eulerAngles.y,
+                        ref this.TurnSmoothVelocity, (this.TurnSmoothTime / 2) / PauseManager.GlobalSpeed
+                    );
+                    this.transform.rotation = Quaternion.Euler(0, angle, 0);
+                } else {
+                    float angle = Mathf.SmoothDampAngle(this.transform.eulerAngles.y, targetAngle, ref this.TurnSmoothVelocity, this.TurnSmoothTime / PauseManager.GlobalSpeed);
+                    this.transform.rotation = Quaternion.Euler(0, angle, 0);
+                }
 
                 Vector3 movementDirection = Quaternion.Euler(0, targetAngle, 0) * Vector3.forward;
                 this.Controller.Move((PauseManager.GlobalSpeed / 5f) * movementDirection.normalized);
@@ -74,6 +178,10 @@ public partial class PlayerController : MonoBehaviour {
         public bool AttackPressed;
         // --
         public bool InteractPressed;
+        // --
+        public bool TargetPressed;
+        public bool SwitchTargetLeft;
+        public bool SwitchTargetRight;
         //Debug
         public bool HitPressed;
     }
@@ -97,6 +205,10 @@ public partial class PlayerController : MonoBehaviour {
             AttackPressed = false,
             // --
             InteractPressed = this.PlayerInputs.Controls.Interact.WasPressedThisFrame(),
+            // --
+            TargetPressed = this.PlayerInputs.Controls.Target.WasPressedThisFrame(),
+            SwitchTargetLeft = this.PlayerInputs.Controls.SwitchTargetLeft.WasPressedThisFrame(),
+            SwitchTargetRight = this.PlayerInputs.Controls.SwitchTargetRight.WasPressedThisFrame(),
             //Debug
             HitPressed = this.PlayerInputs.Controls.Hit.WasPressedThisFrame(),
         };
@@ -111,6 +223,16 @@ public partial class PlayerController : MonoBehaviour {
             this.Move(this.PlayerInputs.Controls.Move.ReadValue<Vector2>());
         }
 
+        if (this.Input.TargetPressed) {
+            this.ToggleTarget();
+        }
+        if (this.Input.SwitchTargetLeft) {
+            this.SwitchTargetLeft();
+        } else if (this.Input.SwitchTargetRight) {
+            this.SwitchTargetRight();
+        }
+
+        //Debug
         if (this.Input.HitPressed) {
             this.Hit();
         }
@@ -124,12 +246,48 @@ public partial class PlayerController : MonoBehaviour {
     }
 
     private void Interact() {
+        if (this.Targetting)
+            return;
         if (this.Interactions.Count == 0)
             return;
 
         foreach (Action action in this.Interactions) {
             action.Invoke();
         }
+    }
+
+    private void ToggleTarget() {
+        if (this.Targetting) {
+            this.Targetting = false;
+            this.Cinemachine.m_XAxis.m_MaxSpeed = this.XMaxSpeed;
+            this.CurrentTarget.GetComponent<Outlineable>().ChangeColor(Color.white);
+        } else {
+            if (this.CurrentTarget == null)
+                return;
+            this.CurrentTarget.GetComponent<Outlineable>().ChangeColor(Color.red);
+            this.Targetting = true;
+            this.Cinemachine.m_XAxis.m_MaxSpeed = 0;
+        }
+    }
+
+    private void SwitchTargetLeft() {
+        if (!this.Targetting || this.LeftTarget == null)
+            return;
+        this.CurrentTarget.GetComponent<Outlineable>().ChangeColor(Color.white);
+        this.CurrentTarget.GetComponent<Outlineable>().Disable();
+        this.CurrentTarget = this.LeftTarget;
+        this.CurrentTarget.GetComponent<Outlineable>().ChangeColor(Color.red);
+        this.CurrentTarget.GetComponent<Outlineable>().Enable();
+    }
+
+    private void SwitchTargetRight() {
+        if (!this.Targetting || this.RightTarget == null)
+            return;
+        this.CurrentTarget.GetComponent<Outlineable>().ChangeColor(Color.white);
+        this.CurrentTarget.GetComponent<Outlineable>().Disable();
+        this.CurrentTarget = this.RightTarget;
+        this.CurrentTarget.GetComponent<Outlineable>().ChangeColor(Color.red);
+        this.CurrentTarget.GetComponent<Outlineable>().Enable();
     }
 
     private void Hit() {
@@ -157,7 +315,7 @@ public partial class PlayerController : MonoBehaviour {
             Chest chest = collider.GetComponentInParent<Chest>();
             this.Interactions.Add(chest.Open);
             if (!chest.Opened)
-                chest.Enable(); 
+                chest.Enable();
         }
 
         if (collider.CompareTag("Door/Left")) {
