@@ -184,6 +184,7 @@ MonoBehaviour:
   TreasureRoom: 0
   Hub: 0
   OriginalDirection: 0
+  PrefabName: 
 --- !u!1 &5512425751870124506
 GameObject:
   m_ObjectHideFlags: 0

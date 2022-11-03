@@ -130,9 +130,34 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1927953898333981241, guid: 4f2ca3d9811629948b493c04edd97c2a,
+        type: 3}
+      propertyPath: m_Type
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1927953898333981241, guid: 4f2ca3d9811629948b493c04edd97c2a,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1927953898333981241, guid: 4f2ca3d9811629948b493c04edd97c2a,
+        type: 3}
+      propertyPath: m_Lightmapping
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1927953898333981241, guid: 4f2ca3d9811629948b493c04edd97c2a,
+        type: 3}
+      propertyPath: m_BounceIntensity
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3012340583063262796, guid: 4f2ca3d9811629948b493c04edd97c2a,
         type: 3}
       propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3012340583063262796, guid: 4f2ca3d9811629948b493c04edd97c2a,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4489520390055580112, guid: 4f2ca3d9811629948b493c04edd97c2a,
@@ -203,17 +228,17 @@ PrefabInstance:
     - target: {fileID: 4489520390296148416, guid: 4f2ca3d9811629948b493c04edd97c2a,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.17842482
+      value: 0.1784248
       objectReference: {fileID: 0}
     - target: {fileID: 4489520390296148416, guid: 4f2ca3d9811629948b493c04edd97c2a,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.000000008465139
+      value: -0.000000008465141
       objectReference: {fileID: 0}
     - target: {fileID: 4489520390296148416, guid: 4f2ca3d9811629948b493c04edd97c2a,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.0000000015350226
+      value: 0.0000000015350229
       objectReference: {fileID: 0}
     - target: {fileID: 4489520390961515954, guid: 4f2ca3d9811629948b493c04edd97c2a,
         type: 3}
@@ -299,6 +324,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalRotation.z
       value: 0.00067295233
+      objectReference: {fileID: 0}
+    - target: {fileID: 5811972375389884333, guid: 4f2ca3d9811629948b493c04edd97c2a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4f2ca3d9811629948b493c04edd97c2a, type: 3}
@@ -445,6 +475,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -350206827478074269, guid: 50e0a89233452dd47a2d2461e143c81e,
+        type: 3}
+      propertyPath: Seed
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: -350206827478074269, guid: 50e0a89233452dd47a2d2461e143c81e,
         type: 3}
       propertyPath: MaxLength
